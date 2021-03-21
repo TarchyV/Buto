@@ -1,8 +1,11 @@
 import 'dart:math';
 
+import 'package:buto/my_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:boto/my_theme.dart';
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:buto/my_theme.dart';
+import 'package:buto/button_page.dart';
+import 'package:buto/my_functions.dart';
+import 'package:animated_list_view_scroll/animated_list_view_scroll.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,150 +38,213 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool clicked = false;
-  bool finished = true;
+  var fun = Functions();
+  var theme = MyTheme();
+
+  double width = 1000;
+  double height = 2000;
+  int runCount = 0;
   @override
   void initState() {
-              clicked = false;
-
+    stateTimer();
     super.initState();
   }
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    // animationController.dispose() instead of your controller.dispose 
-  }
-  double randomDouble(int min,int max){
-    Random rnd;
-    rnd = new Random();
-    return min + rnd.nextInt(max - min).toDouble();
-  }
 
-  void playSound(){
-    AssetsAudioPlayer.newPlayer().open(
-    Audio("assets/press.mp3"),
-    showNotification: false,
-);
-  }
-
-
-Widget button(){
-    return Center(
-      child: GestureDetector(
-        onTapDown: (tdd){
-        playSound();
-          setState(() {
-            clicked = true;
-            finished = false;
-          });
-        },
-        onTapUp: (tdd){
+  void stateTimer() {
+    if (runCount == 0) {
+      Future.delayed(Duration(milliseconds: 600)).then((value) {
         setState(() {
-          clicked = false;
+          runCount = 1;
         });
-        Future.delayed(Duration(milliseconds:600)).then((value) {
-          setState(() {
-           finished = true;
-          });
+      });
+    }
+  }
+
+  Widget backgroundParticle() {
+    double particleX =
+        fun.randomDouble(5, MediaQuery.of(context).size.width.ceil());
+    double particleY =
+        fun.randomDouble(5, MediaQuery.of(context).size.height.ceil());
+    double size = fun.randomDouble(1, 5);
+    return AnimatedPositioned(
+      duration: Duration(seconds: 30),
+      curve: Curves.easeInOut,
+      onEnd: () {
+        print('ended?');
+        setState(() {
+          particleX = new Functions()
+              .randomDouble(5, MediaQuery.of(context).size.width.ceil());
+          particleY = new Functions()
+              .randomDouble(5, MediaQuery.of(context).size.height.ceil());
         });
-        },
-        child: AnimatedContainer(
-          curve: Curves.easeInOut,
-          duration: Duration(milliseconds: 100),
-          width: !clicked?MediaQuery.of(context).size.width/2:(MediaQuery.of(context).size.width/2)-50,
-          height: !clicked?MediaQuery.of(context).size.height/3:(MediaQuery.of(context).size.height/3)-50,
-          decoration: new BoxDecoration(
-            color: MyTheme().accent(),
+      },
+      top: particleY,
+      left: particleX,
+      child: AnimatedContainer(
+        duration: Duration(seconds: 30),
+        width: size,
+        height: size,
+        decoration: new BoxDecoration(
+            color: theme.accent(),
             shape: BoxShape.circle,
-             boxShadow: [
-               !clicked? BoxShadow(
-                  color: Colors.black,
-                  spreadRadius: 8,
-                  blurRadius: 10,
-                  offset: Offset(0, 6), // changes position of shadow
-                ): BoxShadow(
-                  color: Colors.black,
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-          ),
-        ),
+            boxShadow: [
+              BoxShadow(
+                  blurRadius: 5,
+                  spreadRadius: 3,
+                  color: Colors.white38,
+                  offset: Offset(0, 0))
+            ]),
       ),
     );
   }
 
-Widget particle(){
-  double size = randomDouble(1, 3);
-  return AnimatedPositioned(
-    duration: Duration(milliseconds:600),
-      curve: Curves.easeInOut,
-      top: finished? MediaQuery.of(context).size.height/2: randomDouble(0, MediaQuery.of(context).size.height.ceil()),
-      left: finished? MediaQuery.of(context).size.height/4: randomDouble(0, MediaQuery.of(context).size.width.ceil()),
-      child: AnimatedContainer(
-        duration: Duration(milliseconds:300),
-        width: size,
-        height: size,
-        decoration: new BoxDecoration(
-          color: Colors.lightBlue[200],
-          shape: BoxShape.circle
-        )
-        ,
-    ),
-  );
-}
-
-Widget plusOne(){
-  return Center(
-    child: new AnimatedPadding(
-      duration: Duration(milliseconds:400),
-      curve: Curves.easeInCirc,
-      padding: EdgeInsets.only(bottom:finished? 0: MediaQuery.of(context).size.height/2,),
-      child: AnimatedOpacity(
-            duration: Duration(milliseconds:400),
-          opacity: finished? 0:1,
-          child: Container(
-          height: 40,
-          width: 40,
+  Widget listItem() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+          width: double.maxFinite,
+          height: 80,
           decoration: new BoxDecoration(
-            color: MyTheme().warning(),
-            borderRadius: BorderRadius.circular(12)
-          ),
-          child: Center(child: Text('+1',
-          style: TextStyle(
-            fontFamily: MyTheme().fontFamily(),
-            fontSize: 22,
-            fontWeight: FontWeight.bold
-          ),
-          ))
-        ),
-      )
-      ),
-  );
-}
-  
+              color: Colors.black38,
+              border: Border.all(
+                color: theme.accent(),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(8),
+                  bottomRight: Radius.circular(8))),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Something',
+                      style: TextStyle(color: theme.text(), fontSize: 22),
+                    ),
+                  ),
+                  My_Widgets().chartsButton(50)
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5),
+                    child: Text(
+                      'Last-Updated: 2 days ago',
+                      style: TextStyle(color: theme.text(), fontSize: 12),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 0),
+                    child: Text(
+                      '👇210',
+                      style: TextStyle(color: theme.text(), fontSize: 12),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: Text(
+                      'Created: 12 days ago',
+                      style: TextStyle(color: theme.text(), fontSize: 12),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          )),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> particles = new List.generate(50, (index) => particle());
+    List<Widget> particles =
+        new List.generate(50, (index) => backgroundParticle());
+    List<Widget> listItems = new List.generate(10, (index) => listItem());
     return Scaffold(
       backgroundColor: MyTheme().background(),
       body: Container(
         height: MediaQuery.of(context).size.height,
-        child: 
+        child: Stack(
+          children: [
             Stack(
-              children: [
-                  
-                Stack(children: particles,),
-                plusOne(),
-                 button(),
-                
-                
-              ],
-            )    
-      )
+              children: particles,
+            ),
+            Container(
+              decoration: new BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(color: theme.accent(), width: 2))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'BUTO',
+                      style: TextStyle(
+                        fontFamily: theme.fontFamily(),
+                        fontSize: 48,
+                        letterSpacing: 8,
+                        foreground: Paint()..shader = theme.blueGradient(),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 12, 18, 18),
+                    child: IconButton(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        icon: Icon(
+                          Icons.settings,
+                          color: theme.accent(),
+                          size: 32,
+                        ),
+                        onPressed: () {
+                          //Open Settings Page
+                        }),
+                  )
+                ],
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).size.height / 12,
+              left: -2,
+              child: Container(
+                  height: MediaQuery.of(context).size.height / 1.1,
+                  width: MediaQuery.of(context).size.width - 100,
+                  decoration: new BoxDecoration(),
+                  child: AnimatedListViewScroll(
+                    itemCount: 10, //REQUIRED
+                    itemHeight:
+                        100, //REQUIRED (Total height of a single item must contains optional padding or margin)
+                    animationOnReverse: true,
+                    animationDuration: Duration(milliseconds: 200),
+                    itemBuilder: (context, index) {
+                      return AnimatedListViewItem(
+                        key: GlobalKey(), //REQUIRED
+                        index: index, //REQUIRED
+                        animationBuilder: (context, index, controller) {
+                          Animation<Offset> animation = Tween<Offset>(
+                                  begin: Offset(1.0, 0.0), end: Offset.zero)
+                              .animate(controller);
+                          return SlideTransition(
+                            position: animation,
+                            child: listItems[index],
+                          );
+                        },
+                      );
+                    },
+                  )),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
